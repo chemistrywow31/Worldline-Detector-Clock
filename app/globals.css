@@ -1,5 +1,78 @@
 @import "tailwindcss";
 
+/* Keep the title's display faces local and limited to the glyphs it uses. */
+@font-face {
+  font-family: "Shippori Mincho";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url("/fonts/shippori-mincho-95-800-normal.woff2") format("woff2");
+  unicode-range: U+4e4b;
+}
+
+@font-face {
+  font-family: "Shippori Mincho";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url("/fonts/shippori-mincho-104-800-normal.woff2") format("woff2");
+  unicode-range: U+547d;
+}
+
+@font-face {
+  font-family: "Shippori Mincho";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url("/fonts/shippori-mincho-110-800-normal.woff2") format("woff2");
+  unicode-range: U+77f3, U+9580;
+}
+
+@font-face {
+  font-family: "Shippori Mincho";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url("/fonts/shippori-mincho-111-800-normal.woff2") format("woff2");
+  unicode-range: U+672a, U+754c, U+7dda;
+}
+
+@font-face {
+  font-family: "Shippori Mincho";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url("/fonts/shippori-mincho-112-800-normal.woff2") format("woff2");
+  unicode-range: U+4e16;
+}
+
+@font-face {
+  font-family: "Shippori Mincho";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url("/fonts/shippori-mincho-113-800-normal.woff2") format("woff2");
+  unicode-range: U+904b;
+}
+
+@font-face {
+  font-family: "Shippori Mincho";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url("/fonts/shippori-mincho-116-800-normal.woff2") format("woff2");
+  unicode-range: U+77e5;
+}
+
+@font-face {
+  font-family: "Yuji Syuku";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/yuji-syuku-119-400-normal.woff2") format("woff2");
+  unicode-range: U+306e;
+}
+
 :root {
   --orange: #ff7418;
   --orange-hot: #ffc072;

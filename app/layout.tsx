@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import "@fontsource/shippori-mincho/800.css";
 import "@fontsource/wire-one/400.css";
-import "@fontsource/yuji-syuku/400.css";
 import "./globals.css";
 
 export const metadata: Metadata = {

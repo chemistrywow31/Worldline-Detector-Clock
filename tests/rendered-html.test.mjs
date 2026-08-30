@@ -63,8 +63,10 @@ test("keeps the experience local and drives the 3D scene dynamically", async () 
   assert.match(styles, /url\("\/fgl-emblem-render\.png"\)/);
   assert.match(styles, /font-family: "Shippori Mincho"/);
   assert.match(styles, /font-family: "Yuji Syuku"/);
-  assert.match(layout, /@fontsource\/shippori-mincho\/800\.css/);
-  assert.match(layout, /@fontsource\/yuji-syuku\/400\.css/);
+  assert.match(styles, /shippori-mincho-111-800-normal\.woff2/);
+  assert.match(styles, /yuji-syuku-119-400-normal\.woff2/);
+  assert.doesNotMatch(layout, /@fontsource\/shippori-mincho\/800\.css/);
+  assert.doesNotMatch(layout, /@fontsource\/yuji-syuku\/400\.css/);
   assert.match(layout, /images: \["\/og\.png"\]/);
   assert.doesNotMatch(page, /WEBGL \/ 3D|scene-badge/);
   assert.match(page, /<DivergenceScene chars=\{shownChars\} scanning=\{scanning\}/);
