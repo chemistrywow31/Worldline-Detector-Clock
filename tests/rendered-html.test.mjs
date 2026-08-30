@@ -3,18 +3,11 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 async function render() {
-  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
-  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
-  const { default: worker } = await import(workerUrl.href);
-
-  return worker.fetch(
-    new Request("http://localhost/", { headers: { accept: "text/html" } }),
-    { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } },
-    { waitUntil() {}, passThroughOnException() {} },
-  );
+  const html = await readFile(new URL("../dist/client/index.html", import.meta.url), "utf8");
+  return new Response(html, { headers: { "content-type": "text/html; charset=utf-8" } });
 }
 
-test("server-renders the divergence meter shell", async () => {
+test("static export renders the divergence meter shell", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
@@ -29,6 +22,8 @@ test("server-renders the divergence meter shell", async () => {
   assert.match(html, /language-switch/);
   assert.match(html, /og\.png/);
   assert.match(html, /page-emblem/);
+  assert.match(html, /https:\/\/chemistry-wow\.com\/worldline-detector\/_next\/static\//);
+  assert.doesNotMatch(html, /@vite\/client|localhost:2013/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|Building your site/i);
 });
 
@@ -66,11 +61,11 @@ test("keeps the experience local and drives the 3D scene dynamically", async () 
   assert.doesNotMatch(page, /FGL \/\/ 204/);
   assert.match(page, /className="page-emblem"/);
   assert.doesNotMatch(page, /className="fgl-emblem"/);
-  assert.match(styles, /url\("\/fgl-emblem-render\.png"\)/);
+  assert.match(styles, /url\("\/worldline-detector\/fgl-emblem-render\.png"\)/);
   assert.match(page, /unknown-worldline-steins-gate-wordmark\.png/);
   assert.match(page, /未知世界線のシュタインズ・ゲート/);
   assert.doesNotMatch(page, /<svg className="destiny-title"/);
-  assert.match(page, /width="640"/);
+  assert.match(page, /width=\{640\}/);
   assert.match(page, /mixBlendMode: "lighten"/);
   assert.match(styles, /mix-blend-mode: lighten/);
   assert.match(styles, /mask-image: linear-gradient\(to bottom/);
@@ -80,7 +75,7 @@ test("keeps the experience local and drives the 3D scene dynamically", async () 
   assert.match(styles, /yuji-syuku-119-400-normal\.woff2/);
   assert.doesNotMatch(layout, /@fontsource\/shippori-mincho\/800\.css/);
   assert.doesNotMatch(layout, /@fontsource\/yuji-syuku\/400\.css/);
-  assert.match(layout, /images: \["\/og\.png"\]/);
+  assert.match(layout, /images: \["https:\/\/chemistry-wow\.com\/worldline-detector\/og\.png"\]/);
   assert.doesNotMatch(page, /WEBGL \/ 3D|scene-badge/);
   assert.match(page, /<DivergenceScene chars=\{shownChars\} scanning=\{scanning\}/);
   assert.doesNotMatch(page, /localStorage|fetch\(|\/api\//);

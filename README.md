@@ -16,6 +16,23 @@ npm run dev
 npm run build
 ```
 
+## Static production deployment
+
+The production site is exported as static files for
+`https://chemistry-wow.com/worldline-detector/`. Build and validate the
+deployable package with:
+
+```bash
+nvm use
+npm run deploy:static
+```
+
+The reusable build script writes the site to `dist/client`, checks that the
+HTML does not contain the Vite development client, and verifies that generated
+JS, CSS, image, and font URLs map to files in that directory. Nginx serves this
+directory directly; no Node production process or `npm start` command is
+required.
+
 This starter does not use `wrangler.jsonc`.
 
 ## Included Shape
@@ -90,7 +107,8 @@ actions tied to the current ChatGPT user. Leave public content anonymous.
 ## Useful Commands
 
 - `npm run dev`: start local development
-- `npm run build`: verify the vinext build output
+- `npm run build`: create and validate the static production package
+- `npm run deploy:static`: rebuild the Nginx-served static package
 - `npm test`: build the starter and verify its rendered loading skeleton
 - `npm run db:generate`: generate Drizzle migrations after schema changes
 

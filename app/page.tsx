@@ -1,8 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Image from "next/image";
 import { DivergenceScene } from "./components/DivergenceScene";
+
+export const dynamic = "force-static";
+
+const APP_BASE_PATH = "/worldline-detector";
 
 type Mode = "time" | "worldline";
 type Locale = "zh-TW" | "en" | "ja";
@@ -265,15 +268,13 @@ const FORTUNES: Record<Locale, Fortune[]> = {
 
 function DestinyGateTitle() {
   return (
-    <Image
+    <img
       className="destiny-title-art"
-      src="/unknown-worldline-steins-gate-wordmark.png"
-      width="640"
-      height="225"
+      src={`${APP_BASE_PATH}/unknown-worldline-steins-gate-wordmark.png`}
+      width={640}
+      height={225}
       alt=""
       aria-hidden="true"
-      priority
-      sizes="(max-width: 720px) calc(100vw - 28px), (max-width: 1120px) 600px, 34vw"
       style={{ width: "100%", maxWidth: "100%", height: "auto", objectFit: "contain", mixBlendMode: "lighten" }}
     />
   );
