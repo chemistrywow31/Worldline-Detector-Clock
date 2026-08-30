@@ -167,13 +167,13 @@ const STEINS_GATE_RESULT: Record<Locale, Fortune> = {
     copy: "觀測值與 1.048596 完全一致。既定收束已被欺騙，未知的門扉此刻開啟。",
   },
   en: {
-    label: "STEINS GATE",
-    title: "Upon the Interface of the Steins Gate",
+    label: "STEINS;GATE",
+    title: "Open the Steins Gate",
     copy: "The observed value matches 1.048596 exactly. Convergence has been deceived, and the gate to the unknown now stands open.",
   },
   ja: {
     label: "シュタインズ・ゲート",
-    title: "境界面上のシュタインズ・ゲート",
+    title: "境界面上のシュタインズゲート",
     copy: "観測値は 1.048596 と完全に一致。既定の収束は欺かれ、未知への門は開かれた。",
   },
 };
@@ -323,7 +323,7 @@ function createWorldline() {
 function getFortune(reading: string, locale: Locale) {
   const distance = Math.abs(Number(reading) - STEINS_GATE_VALUE);
 
-  if (reading === STEINS_GATE_READING) {
+  if (distance === 0) {
     return {
       ...STEINS_GATE_RESULT[locale],
       score: 100,
@@ -435,7 +435,9 @@ export default function Home() {
     : "—";
   const zone = now ? Intl.DateTimeFormat().resolvedOptions().timeZone : "LOCAL";
   const fortune = useMemo(() => getFortune(worldline, locale), [worldline, locale]);
-  const activeSegments = Math.round((fortune.score / 100) * 12);
+  const activeSegments = fortune.score === 100
+    ? 12
+    : Math.min(11, Math.round((fortune.score / 100) * 12));
 
   const switchMode = (nextMode: Mode) => {
     if (nextMode === mode) return;

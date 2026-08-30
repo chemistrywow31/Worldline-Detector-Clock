@@ -52,10 +52,12 @@ test("keeps the experience local and drives the 3D scene dynamically", async () 
   assert.match(page, /type Locale = "zh-TW" \| "en" \| "ja"/);
   assert.match(page, /STEINS_GATE_READING = "1\.048596"/);
   assert.match(page, /Math\.abs\(Number\(reading\) - STEINS_GATE_VALUE\)/);
-  assert.match(page, /reading === STEINS_GATE_READING/);
+  assert.match(page, /if \(distance === 0\)/);
   assert.match(page, /境界面上的命運石之門/);
-  assert.match(page, /Upon the Interface of the Steins Gate/);
-  assert.match(page, /境界面上のシュタインズ・ゲート/);
+  assert.match(page, /Open the Steins Gate/);
+  assert.match(page, /境界面上のシュタインズゲート/);
+  assert.match(page, /fortune\.score === 100/);
+  assert.match(page, /Math\.min\(11, Math\.round/);
   assert.match(page, /wordmark-code">FGL</);
   assert.doesNotMatch(page, /FGL \/\/ 204/);
   assert.match(page, /className="page-emblem"/);
