@@ -67,6 +67,10 @@ test("keeps the experience local and drives the 3D scene dynamically", async () 
   assert.match(page, /unknown-worldline-steins-gate-wordmark\.png/);
   assert.match(page, /未知世界線のシュタインズ・ゲート/);
   assert.doesNotMatch(page, /<svg className="destiny-title"/);
+  assert.match(page, /width="640"/);
+  assert.match(page, /mixBlendMode: "lighten"/);
+  assert.match(styles, /mix-blend-mode: lighten/);
+  assert.match(styles, /mask-image: linear-gradient\(to bottom/);
   assert.match(styles, /font-family: "Shippori Mincho"/);
   assert.match(styles, /font-family: "Yuji Syuku"/);
   assert.match(styles, /shippori-mincho-111-800-normal\.woff2/);

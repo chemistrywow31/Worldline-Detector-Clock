@@ -388,14 +388,17 @@ button { -webkit-tap-highlight-color: transparent; }
   flex: 1;
   margin: auto;
   display: grid;
-  grid-template-columns: clamp(340px, 28vw, 500px) minmax(0, 1fr);
+  grid-template-columns: clamp(380px, 34vw, 600px) minmax(0, 1fr);
   gap: clamp(12px, 1.6vw, 28px);
   align-items: center;
   padding: clamp(16px, 2.5vh, 30px) 0 clamp(14px, 2vh, 26px);
 }
 
 .intro-panel {
+  min-width: 0;
   min-height: clamp(670px, calc(100svh - 130px), 900px);
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -435,23 +438,31 @@ h1 {
 }
 
 .destiny-heading {
-  width: min(40vw, 640px);
-  max-width: none;
+  width: 100%;
+  max-width: 600px;
   position: relative;
   z-index: 4;
-  margin: -18px 0 5px -12px;
+  margin: -14px 0 7px -5px;
   font-size: 0;
   line-height: 0;
 }
 
 .destiny-title-art {
   width: 100%;
+  max-width: 100%;
   height: auto;
   display: block;
-  mix-blend-mode: screen;
+  opacity: .9;
+  mix-blend-mode: lighten;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 7%, #000 88%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 7%, #000 88%, transparent 100%);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
   filter:
-    saturate(.92)
-    drop-shadow(0 0 10px rgba(255, 93, 18, .12));
+    saturate(.82)
+    brightness(.84)
+    contrast(1.08)
+    drop-shadow(0 0 9px rgba(255, 93, 18, .09));
   transform-origin: center;
   animation: title-sigil-in .72s cubic-bezier(.17,.82,.29,1) both;
 }
@@ -694,7 +705,11 @@ h1 {
   letter-spacing: .04em;
 }
 
-.device-column { min-width: 0; }
+.device-column {
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+}
 
 .device-stage {
   width: 100%;
@@ -917,8 +932,8 @@ h1 {
     padding: 58px 0 50px;
   }
   .device-column { grid-row: 1; }
-  .intro-panel { grid-row: 2; min-height: auto; max-width: 660px; }
-  .destiny-heading { width: min(100%, 640px); }
+  .intro-panel { grid-row: 2; width: 100%; min-height: auto; max-width: 720px; }
+  .destiny-heading { width: 100%; max-width: 600px; }
   h1 br { display: none; }
   .worldline-heading br { display: block; }
   .fortune-result { width: min(590px, 100%); }
@@ -955,7 +970,7 @@ h1 {
   .intro-panel { width: 100%; min-height: 380px; padding-top: 40px; }
   .kicker { margin-bottom: 15px; font-size: 10px; }
   h1 { font-size: 42px; line-height: 1.24; }
-  .destiny-heading { width: min(100%, 520px); margin: -10px 0 4px -7px; }
+  .destiny-heading { width: 100%; max-width: 520px; margin: -8px 0 5px -3px; }
   .destiny-title-motto { max-width: 470px; font-size: 12px; }
   .time-readout { margin-top: 22px; font-size: 60px; }
   .date-line { font-size: 13px; }

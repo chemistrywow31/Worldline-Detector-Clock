@@ -268,12 +268,13 @@ function DestinyGateTitle() {
     <Image
       className="destiny-title-art"
       src="/unknown-worldline-steins-gate-wordmark.png"
-      width="2114"
-      height="744"
+      width="640"
+      height="225"
       alt=""
       aria-hidden="true"
       priority
-      sizes="(max-width: 720px) calc(100vw - 28px), (max-width: 1120px) 640px, 40vw"
+      sizes="(max-width: 720px) calc(100vw - 28px), (max-width: 1120px) 600px, 34vw"
+      style={{ width: "100%", maxWidth: "100%", height: "auto", objectFit: "contain", mixBlendMode: "lighten" }}
     />
   );
 }
