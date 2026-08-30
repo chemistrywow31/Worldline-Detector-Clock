@@ -25,6 +25,7 @@ test("server-renders the divergence meter shell", async () => {
   assert.match(html, /未知世界線のシュタインズ・ゲート/);
   assert.match(html, /時間/);
   assert.match(html, /世界線/);
+  assert.match(html, /時序觀測 \/\/ 啟動 \/\/ El Psy Kongroo/);
   assert.match(html, /language-switch/);
   assert.match(html, /og\.png/);
   assert.match(html, /page-emblem/);
@@ -51,6 +52,8 @@ test("keeps the experience local and drives the 3D scene dynamically", async () 
   assert.match(page, /0\.HHMMSS/);
   assert.match(page, /getClockReading/);
   assert.match(page, /type Locale = "zh-TW" \| "en" \| "ja"/);
+  assert.match(page, /CHRONOGRAPH \/\/ ACTIVE \/\/ El Psy Kongroo/);
+  assert.match(page, /時系列観測 \/\/ 起動 \/\/ El Psy Kongroo/);
   assert.match(page, /STEINS_GATE_READING = "1\.048596"/);
   assert.match(page, /Math\.abs\(Number\(reading\) - STEINS_GATE_VALUE\)/);
   assert.match(page, /if \(distance === 0\)/);
