@@ -20,9 +20,9 @@ test("server-renders the divergence meter shell", async () => {
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
-  assert.match(html, /<title>未知世界線の命運石之門｜世界線探測儀<\/title>/i);
+  assert.match(html, /<title>未知世界線のシュタインズ・ゲート｜世界線探測儀<\/title>/i);
   assert.match(html, /世界線探測儀/);
-  assert.match(html, /未知世界線の命運石之門/);
+  assert.match(html, /未知世界線のシュタインズ・ゲート/);
   assert.match(html, /時間/);
   assert.match(html, /世界線/);
   assert.match(html, /language-switch/);
@@ -32,12 +32,13 @@ test("server-renders the divergence meter shell", async () => {
 });
 
 test("keeps the experience local and drives the 3D scene dynamically", async () => {
-  const [page, scene, styles, layout, emblem, socialCard, packageJson] = await Promise.all([
+  const [page, scene, styles, layout, emblem, wordmark, socialCard, packageJson] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/components/DivergenceScene.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../public/fgl-emblem-render.png", import.meta.url)),
+    readFile(new URL("../public/unknown-worldline-steins-gate-wordmark.png", import.meta.url)),
     readFile(new URL("../public/og.png", import.meta.url)),
     readFile(new URL("../package.json", import.meta.url), "utf8"),
   ]);
@@ -63,6 +64,9 @@ test("keeps the experience local and drives the 3D scene dynamically", async () 
   assert.match(page, /className="page-emblem"/);
   assert.doesNotMatch(page, /className="fgl-emblem"/);
   assert.match(styles, /url\("\/fgl-emblem-render\.png"\)/);
+  assert.match(page, /unknown-worldline-steins-gate-wordmark\.png/);
+  assert.match(page, /未知世界線のシュタインズ・ゲート/);
+  assert.doesNotMatch(page, /<svg className="destiny-title"/);
   assert.match(styles, /font-family: "Shippori Mincho"/);
   assert.match(styles, /font-family: "Yuji Syuku"/);
   assert.match(styles, /shippori-mincho-111-800-normal\.woff2/);
@@ -131,6 +135,7 @@ test("keeps the experience local and drives the 3D scene dynamically", async () 
   assert.match(scene, /new THREE\.LatheGeometry\(resistorProfile, 36\)/);
   assert.doesNotMatch(scene, /fillText\(/);
   assert.equal(emblem.subarray(0, 8).toString("hex"), "89504e470d0a1a0a");
+  assert.equal(wordmark.subarray(0, 8).toString("hex"), "89504e470d0a1a0a");
   assert.equal(socialCard.subarray(0, 8).toString("hex"), "89504e470d0a1a0a");
   assert.match(packageJson, /"three":/);
   assert.match(packageJson, /"@fontsource\/shippori-mincho":/);

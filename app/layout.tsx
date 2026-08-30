@@ -4,10 +4,10 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://divergence-meter.chemistrywilly310.chatgpt.site"),
-  title: "未知世界線の命運石之門｜世界線探測儀",
+  title: "未知世界線のシュタインズ・ゲート｜世界線探測儀",
   description: "以立體數字管觀測當地時間，並以 1.048596 為收束目標探測世界線運勢。",
   openGraph: {
-    title: "未知世界線の命運石之門",
+    title: "未知世界線のシュタインズ・ゲート",
     description: "以 1.048596 為收束目標，觀測此刻的世界線。",
     type: "website",
     locale: "zh_TW",
@@ -15,12 +15,12 @@ export const metadata: Metadata = {
       url: "/og.png",
       width: 1672,
       height: 941,
-      alt: "未知世界線の命運石之門",
+      alt: "未知世界線のシュタインズ・ゲート",
     }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "未知世界線の命運石之門",
+    title: "未知世界線のシュタインズ・ゲート",
     description: "以 1.048596 為收束目標，觀測此刻的世界線。",
     images: ["/og.png"],
   },

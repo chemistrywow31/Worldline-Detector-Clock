@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import { DivergenceScene } from "./components/DivergenceScene";
 
 type Mode = "time" | "worldline";
@@ -12,7 +13,7 @@ type Fortune = {
   copy: string;
 };
 
-const DESTINY_GATE_TITLE = "未知世界線の命運石之門";
+const DESTINY_GATE_TITLE = "未知世界線のシュタインズ・ゲート";
 const STEINS_GATE_READING = "1.048596";
 const STEINS_GATE_VALUE = Number(STEINS_GATE_READING);
 
@@ -264,26 +265,16 @@ const FORTUNES: Record<Locale, Fortune[]> = {
 
 function DestinyGateTitle() {
   return (
-    <svg className="destiny-title" viewBox="0 0 1160 300" aria-hidden="true">
-      <defs>
-        <filter id="destiny-title-rough" x="-8%" y="-18%" width="116%" height="136%">
-          <feTurbulence baseFrequency=".014 .09" numOctaves="2" seed="19" result="noise" />
-          <feDisplacementMap in="SourceGraphic" in2="noise" scale=".9" xChannelSelector="R" yChannelSelector="B" />
-        </filter>
-      </defs>
-      <g className="destiny-title-sigil" filter="url(#destiny-title-rough)">
-        <path className="destiny-title-ray" d="M10 157 H1149" />
-        <path className="destiny-title-ray destiny-title-ray-faint" d="M83 170 H1084" />
-        <circle className="destiny-title-node" cx="17" cy="157" r="7" />
-        <circle className="destiny-title-node-inner" cx="17" cy="157" r="2.4" />
-        <path className="destiny-title-slash" d="M486 199 C514 179 528 133 542 79 M538 204 C572 181 586 134 597 87" />
-        <text className="destiny-title-line" x="28" y="180" textLength="455" lengthAdjust="spacingAndGlyphs">未知世界線</text>
-        <text className="destiny-title-no" x="548" y="190" textAnchor="middle">の</text>
-        <text className="destiny-title-line" x="614" y="180" textLength="520" lengthAdjust="spacingAndGlyphs">命運石之門</text>
-        <path className="destiny-title-flare" d="M1046 190 C1090 178 1121 153 1142 117 M1066 205 C1103 199 1132 184 1151 164" />
-      </g>
-      <text className="destiny-title-roman" x="580" y="265" textAnchor="middle">UNKNOWN WORLDLINE // GATE OF DESTINY</text>
-    </svg>
+    <Image
+      className="destiny-title-art"
+      src="/unknown-worldline-steins-gate-wordmark.png"
+      width="2114"
+      height="744"
+      alt=""
+      aria-hidden="true"
+      priority
+      sizes="(max-width: 720px) calc(100vw - 28px), (max-width: 1120px) 640px, 40vw"
+    />
   );
 }
 
