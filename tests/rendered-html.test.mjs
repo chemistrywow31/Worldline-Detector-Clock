@@ -1,11 +1,6 @@
 import assert from "node:assert/strict";
-import { access, readFile, readdir } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
-
-const developmentPreviewMeta =
-  /<meta(?=[^>]*\bname=["']codex-preview["'])(?=[^>]*\bcontent=["']development["'])[^>]*>/i;
-const templateRoot = new URL("../", import.meta.url);
-const previewRoot = new URL("../app/_sites-preview/", import.meta.url);
 
 async function render() {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -13,79 +8,127 @@ async function render() {
   const { default: worker } = await import(workerUrl.href);
 
   return worker.fetch(
-    new Request("http://localhost/", {
-      headers: { accept: "text/html" },
-    }),
-    {
-      ASSETS: {
-        fetch: async () => new Response("Not found", { status: 404 }),
-      },
-    },
-    {
-      waitUntil() {},
-      passThroughOnException() {},
-    },
+    new Request("http://localhost/", { headers: { accept: "text/html" } }),
+    { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } },
+    { waitUntil() {}, passThroughOnException() {} },
   );
 }
 
-test("server-renders the starter loading skeleton", async () => {
+test("server-renders the divergence meter shell", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
-  assert.match(html, developmentPreviewMeta);
-  assert.match(html, /<title>Your site is taking shape<\/title>/i);
-  assert.match(html, /Building your site/);
-  assert.match(html, /Your site is taking shape/);
-  assert.match(
-    html,
-    /Your first version will appear here automatically when it’s ready\./,
-  );
-  assert.doesNotMatch(html, /Codex/);
-  assert.match(html, /react-loading-skeleton/);
-  assert.match(html, /role="status"/);
+  assert.match(html, /<title>未知世界線の命運石之門｜世界線探測儀<\/title>/i);
+  assert.match(html, /世界線探測儀/);
+  assert.match(html, /未知世界線の命運石之門/);
+  assert.match(html, /時間/);
+  assert.match(html, /世界線/);
+  assert.match(html, /language-switch/);
+  assert.match(html, /og\.png/);
+  assert.match(html, /page-emblem/);
+  assert.doesNotMatch(html, /codex-preview|Your site is taking shape|Building your site/i);
 });
 
-test("keeps the loading skeleton scoped and disposable", async () => {
-  const [preview, css, page, layout, packageJson, files] = await Promise.all([
-    readFile(new URL("SkeletonPreview.tsx", previewRoot), "utf8"),
-    readFile(new URL("preview.css", previewRoot), "utf8"),
+test("keeps the experience local and drives the 3D scene dynamically", async () => {
+  const [page, scene, styles, layout, emblem, socialCard, packageJson] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/DivergenceScene.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../public/fgl-emblem-render.png", import.meta.url)),
+    readFile(new URL("../public/og.png", import.meta.url)),
     readFile(new URL("../package.json", import.meta.url), "utf8"),
-    readdir(previewRoot),
   ]);
 
-  assert.deepEqual(files.sort(), ["SkeletonPreview.tsx", "preview.css"]);
-  assert.match(preview, /from "react-loading-skeleton"/);
-  assert.match(preview, /baseColor="#eceae7"/);
-  assert.match(preview, /highlightColor="#f9f8f6"/);
-  assert.match(preview, /duration=\{2\.8\}/);
-  assert.match(preview, /sites-skeleton-search-placeholder/);
-  assert.match(packageJson, /"react-loading-skeleton": "3\.5\.0"/);
-
-  const shellIndex = preview.indexOf('className="sites-skeleton-shell"');
-  const statusIndex = preview.indexOf('className="sites-skeleton-status"');
-  assert.ok(shellIndex >= 0 && statusIndex > shellIndex);
-  assert.match(css, /position:\s*fixed/);
-  assert.match(css, /inset:\s*0/);
-  assert.match(css, /opacity:\s*0\.52/);
-  assert.match(css, /prefers-reduced-motion:\s*reduce/);
-  assert.doesNotMatch(css, /#020617|canvas|pets|progress/i);
-  assert.doesNotMatch(
-    preview,
-    /loading-spinner|status-mark|status-progress|canvas|cookie|random/i,
-  );
-
-  assert.match(page, /export const metadata:\s*Metadata/);
-  assert.match(page, /"codex-preview": "development"/);
-  assert.match(page, /<SkeletonPreview \/>/);
-  assert.match(layout, /title:\s*"Starter Project"/);
-  assert.doesNotMatch(layout, /codex-preview|_sites-preview|themeColor|\bViewport\b/);
-  assert.doesNotMatch(css, /(^|\s)(html|body)\s*\{/m);
-
-  await assert.rejects(
-    access(new URL("public/_sites-preview", templateRoot)),
-  );
+  assert.match(page, /createWorldline/);
+  assert.match(page, /setWorldline\(createWorldline\(\)\)/);
+  assert.match(page, /className="scene-date"/);
+  assert.match(page, /numericDate/);
+  assert.match(page, /requestFullscreen/);
+  assert.match(page, /0\.HHMMSS/);
+  assert.match(page, /getClockReading/);
+  assert.match(page, /type Locale = "zh-TW" \| "en" \| "ja"/);
+  assert.match(page, /STEINS_GATE_READING = "1\.048596"/);
+  assert.match(page, /Math\.abs\(Number\(reading\) - STEINS_GATE_VALUE\)/);
+  assert.match(page, /reading === STEINS_GATE_READING/);
+  assert.match(page, /境界面上的命運石之門/);
+  assert.match(page, /Upon the Interface of the Steins Gate/);
+  assert.match(page, /境界面上のシュタインズ・ゲート/);
+  assert.match(page, /wordmark-code">FGL</);
+  assert.doesNotMatch(page, /FGL \/\/ 204/);
+  assert.match(page, /className="page-emblem"/);
+  assert.doesNotMatch(page, /className="fgl-emblem"/);
+  assert.match(styles, /url\("\/fgl-emblem-render\.png"\)/);
+  assert.match(styles, /font-family: "Shippori Mincho"/);
+  assert.match(styles, /font-family: "Yuji Syuku"/);
+  assert.match(layout, /@fontsource\/shippori-mincho\/800\.css/);
+  assert.match(layout, /@fontsource\/yuji-syuku\/400\.css/);
+  assert.match(layout, /images: \["\/og\.png"\]/);
+  assert.doesNotMatch(page, /WEBGL \/ 3D|scene-badge/);
+  assert.match(page, /<DivergenceScene chars=\{shownChars\} scanning=\{scanning\}/);
+  assert.doesNotMatch(page, /localStorage|fetch\(|\/api\//);
+  assert.match(scene, /WebGLRenderer/);
+  assert.match(scene, /MeshPhysicalMaterial/);
+  assert.match(scene, /UnrealBloomPass/);
+  assert.match(scene, /DIGIT_SUPPORT_WIRES/);
+  assert.match(scene, /context\.arc\(200, 425, 10/);
+  assert.match(scene, /createCathodePaths/);
+  assert.match(scene, /new Path2D/);
+  assert.match(scene, /M76 162 L180 162/);
+  assert.match(scene, /M68 78 L184 78 L118 243/);
+  assert.match(scene, /M148 78 L73 313 L190 313/);
+  assert.match(scene, /M128 82 L128 392/);
+  assert.doesNotMatch(scene, /M171 78 L171 398/);
+  assert.match(scene, /M189 78 L110 78 C108 117 102 181 95 239/);
+  assert.match(scene, /C99 399 75 366 72 316/);
+  assert.doesNotMatch(scene, /C88 145 80 229 76 314/);
+  assert.match(scene, /usesFineSupportWires = char === "4" \|\| char === "5"/);
+  assert.doesNotMatch(scene, /M145 80 L76 264 L145 264 Z/);
+  assert.match(scene, /createInactiveCathodeTexture/);
+  assert.match(scene, /createBrushedMetalTextures/);
+  assert.match(scene, /createPhenolicBoardTextures/);
+  assert.match(scene, /RoundedBoxGeometry/);
+  assert.match(scene, /RoomEnvironment/);
+  assert.match(scene, /roughnessMap: brushedTextures\.roughnessMap/);
+  assert.match(scene, /bumpMap: brushedTextures\.bumpMap/);
+  assert.match(scene, /const upperHousing/);
+  assert.match(scene, /const lowerHousing/);
+  assert.match(scene, /const recessedSeam/);
+  assert.doesNotMatch(scene, /const screwSlotGeometry/);
+  assert.match(scene, /const rubberFootGeometry/);
+  assert.match(scene, /const boardScrewMaterial/);
+  assert.doesNotMatch(scene, /boardScrewGeometry, screwMaterial/);
+  assert.match(scene, /new RoundedBoxGeometry\(12\.18, \.15, 3\.5, 2, \.014\)/);
+  assert.match(scene, /const columns = 125/);
+  assert.match(scene, /const rows = 33/);
+  assert.match(scene, /new THREE\.CircleGeometry\(\.0205, 12\)/);
+  assert.match(scene, /const socketFlange/);
+  assert.match(scene, /new THREE\.TubeGeometry\(pinCurve, 5, \.011, 5, false\)/);
+  assert.match(scene, /const bluePot/);
+  assert.match(scene, /const lyingCapacitor/);
+  assert.match(scene, /for \(let index = 0; index < 8; index \+= 1\)/);
+  assert.match(scene, /const greenResistorMaterial/);
+  assert.match(scene, /device\.position\.y = 0/);
+  assert.doesNotMatch(scene, /emissiveIntensity: \.86/);
+  assert.match(scene, /PlaneGeometry\(1\.22, 1\.66\)/);
+  assert.match(scene, /PlaneGeometry\(1\.26, 1\.72\)/);
+  assert.match(scene, /new THREE\.Vector2\(\.415, 1\.7\)/);
+  assert.match(scene, /new THREE\.Vector2\(\.096, 2\.235\)/);
+  assert.match(scene, /new THREE\.Vector2\(\.029, 2\.296\)/);
+  assert.match(scene, /lyingCapacitor\.rotation\.y = 1\.36/);
+  assert.match(scene, /const lyingPolarityStripe/);
+  assert.match(scene, /const shoulderStripe/);
+  assert.match(scene, /const greenLeadMaterial/);
+  assert.match(scene, /new THREE\.CylinderGeometry\(\.254, \.284, \.205, 24, 1, true, \.35, \.82\)/);
+  assert.doesNotMatch(scene, /const capacitorScoreMaterial/);
+  assert.match(scene, /new THREE\.LatheGeometry\(bodyProfile, 48\)/);
+  assert.match(scene, /new THREE\.LatheGeometry\(resistorProfile, 36\)/);
+  assert.doesNotMatch(scene, /fillText\(/);
+  assert.equal(emblem.subarray(0, 8).toString("hex"), "89504e470d0a1a0a");
+  assert.equal(socialCard.subarray(0, 8).toString("hex"), "89504e470d0a1a0a");
+  assert.match(packageJson, /"three":/);
+  assert.match(packageJson, /"@fontsource\/shippori-mincho":/);
+  assert.match(packageJson, /"@fontsource\/yuji-syuku":/);
 });
