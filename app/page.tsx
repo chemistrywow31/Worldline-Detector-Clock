@@ -270,12 +270,12 @@ function DestinyGateTitle() {
   return (
     <img
       className="destiny-title-art"
-      src={`${APP_BASE_PATH}/unknown-worldline-steins-gate-wordmark.png`}
-      width={640}
-      height={225}
+      src={`${APP_BASE_PATH}/unknown-worldline-steins-gate-wordmark.webp`}
+      width={1200}
+      height={422}
       alt=""
       aria-hidden="true"
-      style={{ width: "100%", maxWidth: "100%", height: "auto", objectFit: "contain", mixBlendMode: "lighten" }}
+      decoding="async"
     />
   );
 }

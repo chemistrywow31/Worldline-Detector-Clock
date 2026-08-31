@@ -33,8 +33,8 @@ test("keeps the experience local and drives the 3D scene dynamically", async () 
     readFile(new URL("../app/components/DivergenceScene.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../public/fgl-emblem-render.png", import.meta.url)),
-    readFile(new URL("../public/unknown-worldline-steins-gate-wordmark.png", import.meta.url)),
+    readFile(new URL("../public/fgl-emblem-render.webp", import.meta.url)),
+    readFile(new URL("../public/unknown-worldline-steins-gate-wordmark.webp", import.meta.url)),
     readFile(new URL("../public/og.png", import.meta.url)),
     readFile(new URL("../package.json", import.meta.url), "utf8"),
   ]);
@@ -61,12 +61,11 @@ test("keeps the experience local and drives the 3D scene dynamically", async () 
   assert.doesNotMatch(page, /FGL \/\/ 204/);
   assert.match(page, /className="page-emblem"/);
   assert.doesNotMatch(page, /className="fgl-emblem"/);
-  assert.match(styles, /url\("\/worldline-detector\/fgl-emblem-render\.png"\)/);
-  assert.match(page, /unknown-worldline-steins-gate-wordmark\.png/);
+  assert.match(styles, /url\("\/worldline-detector\/fgl-emblem-render\.webp"\)/);
+  assert.match(page, /unknown-worldline-steins-gate-wordmark\.webp/);
   assert.match(page, /未知世界線のシュタインズ・ゲート/);
   assert.doesNotMatch(page, /<svg className="destiny-title"/);
-  assert.match(page, /width=\{640\}/);
-  assert.match(page, /mixBlendMode: "lighten"/);
+  assert.match(page, /width=\{1200\}/);
   assert.match(styles, /mix-blend-mode: lighten/);
   assert.match(styles, /mask-image: linear-gradient\(to bottom/);
   assert.match(styles, /font-family: "Shippori Mincho"/);
@@ -120,7 +119,10 @@ test("keeps the experience local and drives the 3D scene dynamically", async () 
   assert.match(scene, /const lyingCapacitor/);
   assert.match(scene, /for \(let index = 0; index < 8; index \+= 1\)/);
   assert.match(scene, /const greenResistorMaterial/);
-  assert.match(scene, /device\.position\.y = 0/);
+  assert.match(scene, /const digitTextureCache = new Map/);
+  assert.match(scene, /new IntersectionObserver/);
+  assert.match(scene, /renderer\.shadowMap\.autoUpdate = false/);
+  assert.doesNotMatch(scene, /device\.position\.y = 0/);
   assert.doesNotMatch(scene, /emissiveIntensity: \.86/);
   assert.match(scene, /PlaneGeometry\(1\.22, 1\.66\)/);
   assert.match(scene, /PlaneGeometry\(1\.26, 1\.72\)/);
@@ -136,8 +138,10 @@ test("keeps the experience local and drives the 3D scene dynamically", async () 
   assert.match(scene, /new THREE\.LatheGeometry\(bodyProfile, 48\)/);
   assert.match(scene, /new THREE\.LatheGeometry\(resistorProfile, 36\)/);
   assert.doesNotMatch(scene, /fillText\(/);
-  assert.equal(emblem.subarray(0, 8).toString("hex"), "89504e470d0a1a0a");
-  assert.equal(wordmark.subarray(0, 8).toString("hex"), "89504e470d0a1a0a");
+  assert.equal(emblem.subarray(0, 4).toString("ascii"), "RIFF");
+  assert.equal(emblem.subarray(8, 12).toString("ascii"), "WEBP");
+  assert.equal(wordmark.subarray(0, 4).toString("ascii"), "RIFF");
+  assert.equal(wordmark.subarray(8, 12).toString("ascii"), "WEBP");
   assert.equal(socialCard.subarray(0, 8).toString("hex"), "89504e470d0a1a0a");
   assert.match(packageJson, /"three":/);
   assert.match(packageJson, /"@fontsource\/shippori-mincho":/);

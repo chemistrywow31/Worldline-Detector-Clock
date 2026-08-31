@@ -203,6 +203,20 @@ function createDigitTexture(char: string) {
   return texture;
 }
 
+// Only eleven distinct faces ever appear, so raster each one once and share it
+// across tubes instead of redrawing on every digit change.
+const digitTextureCache = new Map<string, THREE.Texture>();
+
+function getDigitTexture(char: string) {
+  let texture = digitTextureCache.get(char);
+  if (!texture) {
+    texture = createDigitTexture(char);
+    texture.userData.shared = true;
+    digitTextureCache.set(char, texture);
+  }
+  return texture;
+}
+
 function createInactiveCathodeTexture() {
   const canvas = document.createElement("canvas");
   canvas.width = 256;
@@ -402,7 +416,7 @@ function disposeMaterial(material: THREE.Material) {
   const withMaps = material as THREE.Material & Record<string, unknown>;
   for (const key of ["map", "alphaMap", "normalMap", "bumpMap", "roughnessMap", "metalnessMap", "emissiveMap"]) {
     const value = withMaps[key];
-    if (value instanceof THREE.Texture) value.dispose();
+    if (value instanceof THREE.Texture && !value.userData.shared) value.dispose();
   }
   material.dispose();
 }
@@ -413,7 +427,6 @@ export function DivergenceScene({ chars, scanning, loadingLabel }: DivergenceSce
   const digitCharsRef = useRef<string[]>([]);
   const scanningRef = useRef(scanning);
   const digitSurfacesRef = useRef<DigitSurface[]>([]);
-  const digitTexturesRef = useRef<THREE.Texture[]>([]);
   const charsSignature = chars.join("");
 
   useEffect(() => {
@@ -423,14 +436,10 @@ export function DivergenceScene({ chars, scanning, loadingLabel }: DivergenceSce
 
     nextChars.forEach((char, index) => {
       if (digitCharsRef.current[index] === char) return;
-      digitTexturesRef.current[index]?.dispose();
-      const texture = createDigitTexture(char);
+      const texture = getDigitTexture(char);
       const surface = digitSurfacesRef.current[index];
       surface.core.map = texture;
       surface.glow.map = texture;
-      surface.core.needsUpdate = true;
-      surface.glow.needsUpdate = true;
-      digitTexturesRef.current[index] = texture;
       digitCharsRef.current[index] = char;
     });
   }, [charsSignature]);
@@ -446,6 +455,7 @@ export function DivergenceScene({ chars, scanning, loadingLabel }: DivergenceSce
     let disposed = false;
     let animationFrame = 0;
     let resizeObserver: ResizeObserver | null = null;
+    let visibilityObserver: IntersectionObserver | null = null;
     const pointer = new THREE.Vector2(0, 0);
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -465,6 +475,10 @@ export function DivergenceScene({ chars, scanning, loadingLabel }: DivergenceSce
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      // Nothing but the device's pointer tilt moves, so drive the 2048px depth
+      // pass manually instead of re-rendering it on every frame.
+      renderer.shadowMap.autoUpdate = false;
+      renderer.shadowMap.needsUpdate = true;
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.04;
@@ -737,7 +751,6 @@ export function DivergenceScene({ chars, scanning, loadingLabel }: DivergenceSce
       const cageGeometry = new THREE.BufferGeometry().setFromPoints(cagePoints);
       const tubeX = [-4.9, -3.5, -2.1, -.7, .7, 2.1, 3.5, 4.9];
       const digitSurfaces: DigitSurface[] = [];
-      const digitTextures: THREE.Texture[] = [];
 
       tubeX.forEach((x, index) => {
         const tube = new THREE.Group();
@@ -820,7 +833,7 @@ export function DivergenceScene({ chars, scanning, loadingLabel }: DivergenceSce
         inactiveCathodes.renderOrder = 1;
         tube.add(inactiveCathodes);
 
-        const texture = createDigitTexture(charsRef.current[index] ?? "0");
+        const texture = getDigitTexture(charsRef.current[index] ?? "0");
         const coreMaterial = new THREE.MeshBasicMaterial({
           map: texture,
           color: new THREE.Color(1.55, .92, .34),
@@ -850,11 +863,9 @@ export function DivergenceScene({ chars, scanning, loadingLabel }: DivergenceSce
         tube.add(digit);
 
         digitSurfaces.push({ core: coreMaterial, glow: glowMaterial });
-        digitTextures.push(texture);
       });
 
       digitSurfacesRef.current = digitSurfaces;
-      digitTexturesRef.current = digitTextures;
       digitCharsRef.current = charsRef.current.slice(0, 8);
 
       const componentMetal = new THREE.MeshStandardMaterial({
@@ -1227,13 +1238,26 @@ export function DivergenceScene({ chars, scanning, loadingLabel }: DivergenceSce
       resize();
 
       const clock = new THREE.Clock();
+      let running = false;
+      // Seeded out of range so the first turn always refreshes the depth pass.
+      let shadowRotationY = Number.POSITIVE_INFINITY;
+      let shadowRotationX = Number.POSITIVE_INFINITY;
+
       const animate = () => {
-        if (disposed) return;
+        if (disposed || !running) return;
         const elapsed = clock.getElapsedTime();
         const motionScale = reduceMotion.matches ? 0 : 1;
         device.rotation.y += (pointer.x * .045 * motionScale - device.rotation.y) * .055;
         device.rotation.x += ((-.035 + pointer.y * .018 * motionScale) - device.rotation.x) * .055;
-        device.position.y = 0;
+
+        if (
+          Math.abs(device.rotation.y - shadowRotationY) > 1e-4 ||
+          Math.abs(device.rotation.x - shadowRotationX) > 1e-4
+        ) {
+          renderer.shadowMap.needsUpdate = true;
+          shadowRotationY = device.rotation.y;
+          shadowRotationX = device.rotation.x;
+        }
 
         const flicker = scanningRef.current ? .62 + Math.random() * .5 : .96 + Math.sin(elapsed * 9) * .025;
         digitSurfaces.forEach(({ core, glow }) => {
@@ -1246,15 +1270,32 @@ export function DivergenceScene({ chars, scanning, loadingLabel }: DivergenceSce
         composer.render();
         animationFrame = window.requestAnimationFrame(animate);
       };
-      animate();
+
+      const startLoop = () => {
+        if (running || disposed) return;
+        running = true;
+        renderer.shadowMap.needsUpdate = true;
+        animate();
+      };
+      const stopLoop = () => {
+        running = false;
+        window.cancelAnimationFrame(animationFrame);
+      };
+
+      visibilityObserver = new IntersectionObserver((entries) => {
+        // A batched scroll out-and-back delivers both records at once; only the
+        // newest one describes where the scene is now.
+        if (entries[entries.length - 1].isIntersecting) startLoop();
+        else stopLoop();
+      });
+      visibilityObserver.observe(host);
 
       const cleanup = () => {
-        window.cancelAnimationFrame(animationFrame);
+        stopLoop();
+        visibilityObserver?.disconnect();
         resizeObserver?.disconnect();
         host.removeEventListener("pointermove", onPointerMove);
         host.removeEventListener("pointerleave", onPointerLeave);
-        digitTexturesRef.current.forEach((texture) => texture.dispose());
-        digitTexturesRef.current = [];
         digitCharsRef.current = [];
         digitSurfacesRef.current = [];
         scene.traverse((object) => {

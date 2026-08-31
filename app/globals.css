@@ -196,7 +196,7 @@ button { -webkit-tap-highlight-color: transparent; }
   transform: translateY(-47%);
   pointer-events: none;
   user-select: none;
-  background: url("/worldline-detector/fgl-emblem-render.png") center / contain no-repeat;
+  background: url("/worldline-detector/fgl-emblem-render.webp") center / contain no-repeat;
   filter:
     drop-shadow(0 10px 14px rgba(0, 0, 0, .64))
     drop-shadow(0 0 9px rgba(205, 145, 36, .12));
@@ -452,6 +452,7 @@ h1 {
   max-width: 100%;
   height: auto;
   display: block;
+  object-fit: contain;
   opacity: .9;
   mix-blend-mode: lighten;
   -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 7%, #000 88%, transparent 100%);
@@ -796,8 +797,9 @@ h1 {
   padding: 11px 13px;
   color: #72736c;
   border: 1px solid rgba(132, 126, 103, .2);
-  background: rgba(7, 8, 7, .58);
-  backdrop-filter: blur(6px);
+  /* Solid enough to skip a backdrop blur, which would re-filter the WebGL
+     canvas underneath on every rendered frame. */
+  background: rgba(7, 8, 7, .82);
   text-decoration: none;
 }
 
