@@ -458,6 +458,12 @@ export function DivergenceScene({ chars, scanning, loadingLabel }: DivergenceSce
     let visibilityObserver: IntersectionObserver | null = null;
     const pointer = new THREE.Vector2(0, 0);
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    // Set on <html> before first paint when the page is loaded as a desktop
+    // wallpaper. It then renders all day, so fidelity gives way to power draw.
+    const wallpaper = document.documentElement.dataset.wallpaper === "1";
+    // Seconds between rendered frames; 0 leaves the site on the display's rate.
+    const frameInterval = wallpaper ? 1 / 30 : 0;
+    let lastPointerAt = Number.NEGATIVE_INFINITY;
 
     const start = async () => {
       await document.fonts.ready;
@@ -471,8 +477,14 @@ export function DivergenceScene({ chars, scanning, loadingLabel }: DivergenceSce
       camera.position.set(0, 4.15, 12.8);
       camera.lookAt(0, 1.4, 0);
 
-      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: false,
+        powerPreference: wallpaper ? "low-power" : "high-performance",
+      });
+      // A 4K or 5K desktop plus the bloom pass is the single most expensive
+      // combination here, so a wallpaper renders below the panel's full density.
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, wallpaper ? 1.5 : 2));
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       // Nothing but the device's pointer tilt moves, so drive the 2048px depth
@@ -1209,14 +1221,21 @@ export function DivergenceScene({ chars, scanning, loadingLabel }: DivergenceSce
       tubeLightRight.position.set(3, 2.55, 1.1);
       scene.add(tubeLightRight);
 
-      const onPointerMove = (event: PointerEvent) => {
+      const aimAt = (clientX: number, clientY: number) => {
         const bounds = host.getBoundingClientRect();
-        pointer.x = ((event.clientX - bounds.left) / bounds.width) * 2 - 1;
-        pointer.y = ((event.clientY - bounds.top) / bounds.height) * 2 - 1;
+        pointer.x = ((clientX - bounds.left) / bounds.width) * 2 - 1;
+        pointer.y = ((clientY - bounds.top) / bounds.height) * 2 - 1;
+        lastPointerAt = performance.now();
       };
+      const onPointerMove = (event: PointerEvent) => aimAt(event.clientX, event.clientY);
       const onPointerLeave = () => pointer.set(0, 0);
       host.addEventListener("pointermove", onPointerMove);
       host.addEventListener("pointerleave", onPointerLeave);
+
+      // Wallpaper hosts forward the desktop cursor as a synthetic mouse event on
+      // the document, which never reaches the host element as a PointerEvent.
+      const onMouseMove = (event: MouseEvent) => aimAt(event.clientX, event.clientY);
+      if (wallpaper) window.addEventListener("mousemove", onMouseMove);
 
       const resize = () => {
         const width = Math.max(host.clientWidth, 1);
@@ -1239,20 +1258,34 @@ export function DivergenceScene({ chars, scanning, loadingLabel }: DivergenceSce
 
       const clock = new THREE.Clock();
       let running = false;
+      let lastRenderAt = Number.NEGATIVE_INFINITY;
       // Seeded out of range so the first turn always refreshes the depth pass.
       let shadowRotationY = Number.POSITIVE_INFINITY;
       let shadowRotationX = Number.POSITIVE_INFINITY;
+      // The idle drift never settles, so a tight threshold would run the 2048px
+      // depth pass on every frame for a tilt too small to read.
+      const shadowEpsilon = wallpaper ? 2e-3 : 1e-4;
 
       const animate = () => {
         if (disposed || !running) return;
+        animationFrame = window.requestAnimationFrame(animate);
+
         const elapsed = clock.getElapsedTime();
+        if (elapsed - lastRenderAt < frameInterval) return;
+        lastRenderAt = elapsed;
+
         const motionScale = reduceMotion.matches ? 0 : 1;
-        device.rotation.y += (pointer.x * .045 * motionScale - device.rotation.y) * .055;
-        device.rotation.x += ((-.035 + pointer.y * .018 * motionScale) - device.rotation.x) * .055;
+        // Nothing hovers a desktop wallpaper for most of the day, and a device
+        // frozen mid-tilt looks broken, so an untouched one sways by itself.
+        const idle = wallpaper && performance.now() - lastPointerAt > 3000;
+        const aimX = idle ? Math.sin(elapsed * .07) * .55 : pointer.x;
+        const aimY = idle ? Math.sin(elapsed * .043 + 1.3) * .4 : pointer.y;
+        device.rotation.y += (aimX * .045 * motionScale - device.rotation.y) * .055;
+        device.rotation.x += ((-.035 + aimY * .018 * motionScale) - device.rotation.x) * .055;
 
         if (
-          Math.abs(device.rotation.y - shadowRotationY) > 1e-4 ||
-          Math.abs(device.rotation.x - shadowRotationX) > 1e-4
+          Math.abs(device.rotation.y - shadowRotationY) > shadowEpsilon ||
+          Math.abs(device.rotation.x - shadowRotationX) > shadowEpsilon
         ) {
           renderer.shadowMap.needsUpdate = true;
           shadowRotationY = device.rotation.y;
@@ -1268,7 +1301,6 @@ export function DivergenceScene({ chars, scanning, loadingLabel }: DivergenceSce
         tubeLightRight.intensity = (scanningRef.current ? 4.8 + Math.random() * 2.1 : 4) * flicker;
 
         composer.render();
-        animationFrame = window.requestAnimationFrame(animate);
       };
 
       const startLoop = () => {
@@ -1282,20 +1314,31 @@ export function DivergenceScene({ chars, scanning, loadingLabel }: DivergenceSce
         window.cancelAnimationFrame(animationFrame);
       };
 
+      // Scrolling answers this on the site. A wallpaper always intersects its own
+      // viewport, so the host app hiding the page is the only pause signal left.
+      let inView = false;
+      const syncLoop = () => {
+        if (inView && !document.hidden) startLoop();
+        else stopLoop();
+      };
+
       visibilityObserver = new IntersectionObserver((entries) => {
         // A batched scroll out-and-back delivers both records at once; only the
         // newest one describes where the scene is now.
-        if (entries[entries.length - 1].isIntersecting) startLoop();
-        else stopLoop();
+        inView = entries[entries.length - 1].isIntersecting;
+        syncLoop();
       });
       visibilityObserver.observe(host);
+      document.addEventListener("visibilitychange", syncLoop);
 
       const cleanup = () => {
         stopLoop();
         visibilityObserver?.disconnect();
         resizeObserver?.disconnect();
+        document.removeEventListener("visibilitychange", syncLoop);
         host.removeEventListener("pointermove", onPointerMove);
         host.removeEventListener("pointerleave", onPointerLeave);
+        window.removeEventListener("mousemove", onMouseMove);
         digitCharsRef.current = [];
         digitSurfacesRef.current = [];
         scene.traverse((object) => {

@@ -35,6 +35,26 @@ required.
 
 This starter does not use `wrangler.jsonc`.
 
+## Desktop wallpaper mode
+
+Appending `?wallpaper=1` (or `#wallpaper`) strips the page down to the device
+filling the screen, so a wallpaper host can point straight at the deployed URL:
+
+```
+https://chemistry-wow.com/worldline-detector/?wallpaper=1
+```
+
+- macOS: [Plash](https://github.com/sindresorhus/Plash) — add the URL as a website.
+- Windows: [Lively Wallpaper](https://github.com/rocksdanister/lively) or
+  Wallpaper Engine — add the URL as a web wallpaper.
+
+Because the scene then renders all day it drops to 30fps, requests the low-power
+GPU, caps its pixel ratio at 1.5, and refreshes shadows only once the device has
+visibly turned. A wallpaper never sees a cursor for most of the day, so an
+untouched device sways on its own; hosts that forward the desktop cursor take
+over the tilt again. The host app is also the only thing that can pause the
+scene while it is covered, so enable its own "pause when occluded" setting.
+
 ## Included Shape
 
 - edit site code under `app/`

@@ -28,6 +28,15 @@ export const metadata: Metadata = {
   },
 };
 
+// Desktop wallpaper hosts (Plash, Lively, Wallpaper Engine) just load a URL, so
+// `?wallpaper=1` flags the stripped-down view. The flag lands on <html> before
+// first paint; leaving it to React would show the full page for a frame first.
+const WALLPAPER_FLAG = `try {
+  var value = new URLSearchParams(location.search).get("wallpaper");
+  var on = (value !== null && value !== "0" && value !== "false") || location.hash === "#wallpaper";
+  if (on) document.documentElement.dataset.wallpaper = "1";
+} catch (error) {}`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -35,6 +44,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-Hant">
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: WALLPAPER_FLAG }} />
+      </head>
       <body>{children}</body>
     </html>
   );

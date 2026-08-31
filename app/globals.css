@@ -1032,3 +1032,57 @@ h1 {
   }
   .scene-hint { display: none; }
 }
+
+/* Desktop wallpaper mode. `?wallpaper=1` drops the reading panel and page chrome
+   so a wallpaper host can point straight at the URL and get only the device. */
+html[data-wallpaper="1"],
+html[data-wallpaper="1"] body { height: 100%; overflow: hidden; }
+
+html[data-wallpaper="1"] .worldline-page {
+  height: 100svh;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+html[data-wallpaper="1"] .site-header,
+html[data-wallpaper="1"] .site-footer,
+html[data-wallpaper="1"] .intro-panel,
+html[data-wallpaper="1"] .device-legend,
+html[data-wallpaper="1"] .scene-hint,
+html[data-wallpaper="1"] .scene-corner,
+html[data-wallpaper="1"] .fullscreen-exit,
+html[data-wallpaper="1"] .ambient-orbit,
+html[data-wallpaper="1"] .noise { display: none; }
+
+html[data-wallpaper="1"] .hero {
+  height: 100%;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  padding: 0;
+}
+
+html[data-wallpaper="1"] .device-column,
+html[data-wallpaper="1"] .device-stage { height: 100%; }
+
+html[data-wallpaper="1"] .device-stage { padding: 0; }
+html[data-wallpaper="1"] .device-aura { inset: 14% 0 0; }
+
+html[data-wallpaper="1"] .scene-frame {
+  height: 100%;
+  min-height: 0;
+  box-shadow: none;
+}
+
+/* The wallpaper sits under the icons and windows, so nothing here is clickable. */
+html[data-wallpaper="1"] .divergence-scene { cursor: default; }
+
+html[data-wallpaper="1"] .scene-date {
+  top: clamp(20px, 3.4vh, 46px);
+  right: clamp(22px, 3vw, 56px);
+  min-width: 210px;
+  padding: 15px 18px;
+  background: rgba(7, 8, 7, .36);
+}
+
+html[data-wallpaper="1"] .scene-date strong { font-size: clamp(38px, 3vw, 58px); }
