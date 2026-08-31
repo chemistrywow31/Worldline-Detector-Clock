@@ -1,6 +1,6 @@
 import { sites } from "@openai/sites-vite-plugin";
 import vinext from "vinext";
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import hostingConfig from "./.openai/hosting.json";
 
 const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
@@ -10,6 +10,32 @@ const { d1, r2 } = hostingConfig;
 
 // macOS Seatbelt blocks FSEvents, so Codex previews need polling for HMR.
 const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === "seatbelt";
+
+// Nginx serves the production site under this prefix, so `app/` hard-codes it
+// into font, image, and page URLs. The dev server publishes `public/` at the
+// root instead, so strip the prefix here and keep one set of source paths.
+const PRODUCTION_BASE_PATH = "/worldline-detector";
+
+const productionBasePath: Plugin = {
+  name: "worldline-detector-base-path",
+  enforce: "pre",
+  configureServer(server) {
+    server.middlewares.use((request, _response, next) => {
+      const url = request.url;
+      if (url === PRODUCTION_BASE_PATH) {
+        request.url = "/";
+      } else if (url?.startsWith(`${PRODUCTION_BASE_PATH}/`)) {
+        request.url = url.slice(PRODUCTION_BASE_PATH.length);
+      }
+      // The app router rebuilds its Request from `originalUrl`, so the prefix
+      // has to come off both or the page route itself still 404s.
+      if (request.url !== url) {
+        (request as { originalUrl?: string }).originalUrl = request.url;
+      }
+      next();
+    });
+  },
+};
 
 const localBindingConfig = {
   main: "./worker/index.ts",
@@ -52,6 +78,7 @@ export default defineConfig(async () => {
         : {}),
     },
     plugins: [
+      productionBasePath,
       vinext(),
       sites(),
       cloudflare({
