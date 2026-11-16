@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { DEFAULT_BASE_PATH, resolveBasePath } from "../scripts/base-path.mjs";
 
 async function render() {
   const html = await readFile(new URL("../dist/client/index.html", import.meta.url), "utf8");
@@ -22,7 +23,13 @@ test("static export renders the divergence meter shell", async () => {
   assert.match(html, /language-switch/);
   assert.match(html, /og\.png/);
   assert.match(html, /page-emblem/);
-  assert.match(html, /https:\/\/chemistry-wow\.com\/worldline-detector\/_next\/static\//);
+  const basePath = resolveBasePath();
+  if (basePath === DEFAULT_BASE_PATH) {
+    assert.match(html, /https:\/\/chemistry-wow\.com\/worldline-detector\/_next\/static\//);
+  } else {
+    assert.ok(html.includes(`"${basePath}_next/static/`), `assets load from ${basePath}_next/static/`);
+    assert.ok(!html.includes("https://chemistry-wow.com/worldline-detector/_next/"));
+  }
   assert.doesNotMatch(html, /@vite\/client|localhost:2013/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|Building your site/i);
 });
