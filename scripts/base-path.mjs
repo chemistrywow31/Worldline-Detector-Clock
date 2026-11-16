@@ -10,13 +10,14 @@ export const PRODUCTION_ORIGIN = "https://chemistry-wow.com";
 const SEGMENT = /^[A-Za-z0-9._~-]+$/;
 
 /**
- * Normalizes a base path to `/segment/.../` with leading and trailing slashes.
- * Unset or empty falls back to DEFAULT_BASE_PATH.
+ * Reads WORLDLINE_BASE_PATH and normalizes it to `/segment/.../` with leading
+ * and trailing slashes. Unset or empty falls back to DEFAULT_BASE_PATH.
  *
- * @param {string | undefined} [value]
+ * @param {Record<string, string | undefined>} [env]
  * @returns {string}
  */
-export function resolveBasePath(value = process.env.WORLDLINE_BASE_PATH) {
+export function resolveBasePath(env = process.env) {
+  const value = env.WORLDLINE_BASE_PATH;
   if (value === undefined || value === "") {
     return DEFAULT_BASE_PATH;
   }
