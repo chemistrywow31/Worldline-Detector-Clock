@@ -5,7 +5,9 @@ import { DivergenceScene } from "./components/DivergenceScene";
 
 export const dynamic = "force-static";
 
-const APP_BASE_PATH = "/worldline-detector";
+// URL prefix of the static export, inlined by vite.config.ts.
+declare const __WORLDLINE_BASE_PATH__: string;
+const APP_BASE_PATH = __WORLDLINE_BASE_PATH__;
 
 type Mode = "time" | "worldline";
 type Locale = "zh-TW" | "en" | "ja";

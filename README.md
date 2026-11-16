@@ -33,6 +33,22 @@ JS, CSS, image, and font URLs map to files in that directory. Nginx serves this
 directory directly; no Node production process or `npm start` command is
 required.
 
+### Serving under another path
+
+The build targets `/worldline-detector/` by default. To serve the same site
+under another prefix, set `WORLDLINE_BASE_PATH` for the build and map that
+prefix onto `dist/client`:
+
+```bash
+WORLDLINE_BASE_PATH=/p/worldline/ npm run build
+```
+
+Script, stylesheet, font, and image URLs then start with that prefix and carry
+no origin. The value needs a leading slash; the trailing slash is optional.
+Leaving it unset (or empty) produces the default production package unchanged.
+The social preview image in the page metadata keeps pointing at
+`https://chemistry-wow.com/worldline-detector/og.png` either way.
+
 This starter does not use `wrangler.jsonc`.
 
 ## Desktop wallpaper mode
